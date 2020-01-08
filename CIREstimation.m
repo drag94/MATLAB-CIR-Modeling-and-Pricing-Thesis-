@@ -1,14 +1,9 @@
-close all; clear all; clc, rng(1), warning off
+function f = CIREstimation(input_data_path, data_frequency, date_format)
+
 %%%% I estimate the initial parameters
 %%% CIR Equation
 %% dX_t=(theta1-theta2*Xt)dt+theta3*sqrt(X_t)dW_t
-%%% Import Data (dati Bot 12 m...serie mensile 1980-2018 presi da 
-% http://www.dt.tesoro.it/it/debito_pubblico/dati_statistici/principali_tassi_di_interesse/) %%%%
-% Data was transformed later. Use Data.xls 
-data_frequency = 12;
-date_format = 'yyyymmm'; %Euribor 3M
-%date_format = 'dd mmm yyyy'; %Pribor 3M
-[rates,~,raw] = xlsread('Eur3Mmonthly.xlsx');
+[rates,~,raw] = xlsread(input_data_path);
 
 date_ranges=raw(1:end,1);
 rates=rates(1:end)/100;
@@ -16,8 +11,7 @@ rates_size = length(rates);
 start_end_dates_all_rates = [datenum(date_ranges(1), date_format), datenum(date_ranges(end), date_format)];
 figure();
 x_axis_2018 = linspace(start_end_dates_all_rates(1), start_end_dates_all_rates(2), rates_size);
-
-subplot(2,1,1), plot(x_axis_2018, rates, 'linewidth', 2);
+plot(x_axis_2018, rates);
 
 %%% Fix limits for y axis for the yield is between -0.6 and 20%
 %ylim([-0.1 0.22]);
@@ -38,9 +32,8 @@ else
 end
 length_positive_rate = length(positive_rates);
 
-% +1 because we have data with header. IS IT NEEDED?
 end_positive_rates = datenum(date_ranges(length_positive_rate), date_format);
-
+figure();
 x_axis_positive = linspace(start_end_dates_all_rates(1), end_positive_rates, length_positive_rate);
 plot(x_axis_positive, positive_rates);
 datetick('x','yyyy');
@@ -104,7 +97,7 @@ fprintf('Inequality 2*alpha*mi >= sigma^2 is satisfied: %s\n', string(2*alpha_op
 ngrid = 50;
 Nobs=length_positive_rate;
 %% PLOTTING 2-D graphs
-figure(1);
+figure();
 visualization_limit = 1.15;
 % plot loglike as a function of alpha given optimal mi and sigma 
 subplot(3,1,1);
@@ -141,7 +134,9 @@ Lnl=zeros(ngrid,ngrid);
 x_plot3D_alpha = Alpha;
 x_plot3D_mi = Mi;
 x_plot3D_sigma = Sigma;
+
 %% plot ln L as a function of alpha and mi given optimal sigma
+figure();
 [Alpha_3D,Mi_3D]=meshgrid(x_plot3D_alpha,x_plot3D_mi);
 for i=1:ngrid
     for j=1:ngrid
@@ -151,7 +146,7 @@ end
 surfc(Alpha_3D,Mi_3D,Lnl)
 xlabel('\alpha');ylabel('\mu');zlabel('lnL');
 %% plot ln L as a function of sigma and mi given optimal alpha
-subplot(1,1,1)
+figure();
 Lnl=zeros(ngrid,ngrid);
 [Mi_3D, Sigma_3D]=meshgrid(x_plot3D_mi,x_plot3D_sigma);
 for i=1:ngrid 
@@ -163,7 +158,7 @@ surfc(Mi_3D,Sigma_3D,Lnl)
 xlabel('\mu');ylabel('\sigma');zlabel('lnL');
 
 %% plot ln L as a function of alpha and sigma given optimal mi
-subplot(1,1,1)
+figure();
 Lnl=zeros(ngrid,ngrid);
 [Alpha_3D, Sigma_3D]=meshgrid(x_plot3D_alpha, x_plot3D_sigma);
 for i=1:ngrid
@@ -182,6 +177,7 @@ Nsteps = length(positive_rates);
 nsim = 10; %numbers of simulation
 %% Simulation of Exact and RealX_t
 [~, xExact] = Exact(alpha_optim,mi_optim,sigma_optim,T,x0,Nsteps,nsim);
+figure();
 cm=colormap(hsv(nsim));
 for i=1:nsim
  disp(xExact(i));
@@ -197,9 +193,10 @@ hold off;
 xlabel('Year');ylabel('Interest Rates in Percentage');
 datetick('x','yyyy');
 title('12 Months Bot Yield and 10 simulated paths 1980-2015');
+
 %i compute the mean of the paths(10)
-mean_exact_10=mean(xExact');
 figure();
+mean_exact_10=mean(xExact');
 plot(x_axis_positive,mean_exact_10,'k-',x_axis_positive,positive_rates);
 xlabel('Year');ylabel('Interest rates in Percentage');
 title('12 Months Bot Yield and mean of 10 simulated paths 1980-2015','fontsize',10);
@@ -209,6 +206,7 @@ legend('Mean of 10 paths','12 Months Bot Yield');
 %% 100 simulation paths
 nsim=100;
 [~, xExact] = Exact(alpha_optim,mi_optim,sigma_optim,T,x0,Nsteps,nsim);
+figure();
 for i=1:nsim
     disp(xExact(i));
     plot(x_axis_positive, xExact(:,i));
@@ -220,6 +218,7 @@ hold off
 xlabel('Year');ylabel('Interest Rates in Percentage');
 datetick('x','yyyy');
 title('12 Months Bot Yield and 100 simulated paths 1980-2015');
+
 %i compute the mean of the paths(100)
 mean_exact_100=mean(xExact');
 figure();
@@ -228,9 +227,11 @@ xlabel('Year');ylabel('Interest rates in Percentage');
 title('12 Months Bot Yield and mean of 100 simulated paths 1980-2015','fontsize',10);
 datetick('x','yyyy');
 legend('Mean of 100 paths','12 Months Bot Yield');
+
 %% 1000 simulation paths
 nsim=1000;
 [~, xExact] = Exact(alpha_optim,mi_optim,sigma_optim,T,x0,Nsteps,nsim);
+figure();
 for i=1:nsim
     disp(xExact(i));
     plot(x_axis_positive,xExact(:,i));
@@ -240,6 +241,7 @@ hold on
 plot(x_axis_positive,positive_rates,'b','LineWidth',2);
 datetick('x','yyyy');
 title('12 Months Bot Yield and 1000 simulated paths 1980-2015');
+
 %i compute the mean of the paths(1000)
 mean_exact_1000=mean(xExact');
 figure();
