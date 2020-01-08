@@ -1,18 +1,19 @@
-close all; clear all; clc; pause(0.01), randn('seed',sum(clock)), rand('seed',sum(clock)), warning off
-TSTART = tic;
+close all; clear all; clc, rng(1), warning off
 %%%% I estimate the initial parameters
 %%% CIR Equation
 %% dX_t=(theta1-theta2*Xt)dt+theta3*sqrt(X_t)dW_t
 %%% Import Data (dati Bot 12 m...serie mensile 1980-2018 presi da 
 % http://www.dt.tesoro.it/it/debito_pubblico/dati_statistici/principali_tassi_di_interesse/) %%%%
 % Data was transformed later. Use Data.xls 
-data_frequency = 250;
-[rates,~,raw] = xlsread('Pribor3m.xlsx');
+data_frequency = 12;
+date_format = 'dd/mm/yy'; %Euribor
+%date_format = 'dd mmm yyyy'; %Pribor
+[rates,~,raw] = xlsread('Euribor3m.xlsx');
 
 date_ranges=raw(1:end,1);
-rates=rates(1:end,2)/100;
+rates=rates(1:end)/100;
 rates_size = length(rates);
-start_end_dates_all_rates = [datenum(date_ranges(1)), datenum(date_ranges(end))];
+start_end_dates_all_rates = [datenum(date_ranges(1), date_format), datenum(date_ranges(end), date_format)];
 figure();
 x_axis_2018 = linspace(start_end_dates_all_rates(1), start_end_dates_all_rates(2), rates_size);
 
@@ -36,9 +37,9 @@ else
     positive_rates = rates;
 end
 length_positive_rate = length(positive_rates);
-% +1 because we have data with header. So we have to shift with one
-% position
-end_positive_rates = datenum(date_ranges(length_positive_rate));
+
+% +1 because we have data with header. IS IT NEEDED?
+end_positive_rates = datenum(date_ranges(length_positive_rate), date_format);
 
 x_axis_positive = linspace(start_end_dates_all_rates(1), end_positive_rates, length_positive_rate);
 plot(x_axis_positive, positive_rates);
@@ -70,7 +71,7 @@ sigma0 = sqrt(var(res, 1)/dt);
 InitialParams = [alpha0 mi0 sigma0] % Vector of initial parameters
 %%
 %%%% Optimization settings
-options  =  optimset('fminunc');
+options  =  optimset('fminsearch');
 options  =  optimset(options , 'Algorithm ','interior-point');
 options  =  optimset(options , 'TolFun'      , 1e-006);
 options  =  optimset(options , 'TolX'        , 1e-006);
@@ -88,13 +89,15 @@ params_to_optimize(1), params_to_optimize(2), params_to_optimize(3));
 
 [params_optim, Fval] = fminsearch(function_to_optimize, InitialParams, options);
 
-fprintf('\n alpha = %+3.6f\n mu = %+3.6f\n sigma = %+3.6f\n', params_optim(1), params_optim(2), params_optim(3));
+fprintf('\nalpha = %+3.6f\nmu = %+3.6f\nsigma = %+3.6f\n', params_optim(1), params_optim(2), params_optim(3));
 fprintf('log-likelihood = %+3.6f\n', -Fval/length_positive_rate);
 
 %% MLE method 
 alpha_optim = params_optim(1);
 mi_optim = params_optim(2);
 sigma_optim = params_optim(3);
+
+fprintf('Inequality 2*?? >= ?^2 is satisfied: %s\n', string(2*alpha_optim*mi_optim >= sigma_optim^2))
 
 %% PLOT SETTINGS
 ngrid = 50;
