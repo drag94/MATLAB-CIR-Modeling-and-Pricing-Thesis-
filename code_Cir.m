@@ -6,9 +6,9 @@ close all; clear all; clc, rng(1), warning off
 % http://www.dt.tesoro.it/it/debito_pubblico/dati_statistici/principali_tassi_di_interesse/) %%%%
 % Data was transformed later. Use Data.xls 
 data_frequency = 12;
-date_format = 'dd/mm/yy'; %Euribor
-%date_format = 'dd mmm yyyy'; %Pribor
-[rates,~,raw] = xlsread('Euribor3m.xlsx');
+date_format = 'yyyymmm'; %Euribor 3M
+%date_format = 'dd mmm yyyy'; %Pribor 3M
+[rates,~,raw] = xlsread('Eur3Mmonthly.xlsx');
 
 date_ranges=raw(1:end,1);
 rates=rates(1:end)/100;
