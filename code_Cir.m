@@ -97,7 +97,7 @@ alpha_optim = params_optim(1);
 mi_optim = params_optim(2);
 sigma_optim = params_optim(3);
 
-fprintf('Inequality 2*?? >= ?^2 is satisfied: %s\n', string(2*alpha_optim*mi_optim >= sigma_optim^2))
+fprintf('Inequality 2*alpha*mi >= sigma^2 is satisfied: %s\n', string(2*alpha_optim*mi_optim >= sigma_optim^2))
 
 %% PLOT SETTINGS
 ngrid = 50;
