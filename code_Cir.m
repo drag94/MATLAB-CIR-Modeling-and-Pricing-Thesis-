@@ -83,7 +83,8 @@ options  =  optimset(options , 'MaxIter'     , 1500);
 options  =  optimset(options , 'Jacobian'     ,'off');
 options  =  optimset(options , 'MeritFunction'     ,'multiobj');
 options  =  optimset(options , 'MaxFunEvals' , 5000);
-%%
+%% Here we minimize a function, but the CIRlog is already negative
+% This is the same as maximizing the LL
 function_to_optimize = @(params_to_optimize) CIRlog(positive_rates, dt, ...
 params_to_optimize(1), params_to_optimize(2), params_to_optimize(3));
 
