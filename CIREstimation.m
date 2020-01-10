@@ -1,4 +1,4 @@
-function f = CIREstimation(input_data_path, data_frequency, date_format)
+function f = CIREstimation(input_data_path, data_frequency, date_format, data_type)
 
 %%%% I estimate the initial parameters
 %%% CIR Equation
@@ -17,12 +17,10 @@ plot(x_axis_2018, rates);
 %ylim([-0.1 0.22]);
 datetick('x','yyyy');
 xlabel('Year'); ylabel('Interest rates in Percentage');
-title('12 Months Bot Yield 1980-2018', 'fontsize', 10);
+title(data_type, 'fontsize', 10);
 
-%% from October 2015 the interest rates become negative, therefore i
-% remove the observations from November 2015 to the end of the time
-% series, and i get 430 observations (from 468 total observations)
-% (Cir does not admit negative interest rates)
+%% Euribor 3-month monthly data Jan-1994 Dec-2011
+%  Pribor 3-month daily data 3-Jan-1994 4-October-2007
 
 negative_rates = find(rates < 0);
 if ~isempty(negative_rates)
@@ -37,6 +35,7 @@ figure();
 x_axis_positive = linspace(start_end_dates_all_rates(1), end_positive_rates, length_positive_rate);
 plot(x_axis_positive, positive_rates);
 datetick('x','yyyy');
+title(strcat(data_type, " - only positive rates"), 'fontsize', 10);
 %ylim([-0.05 0.22]);
 
 %%%%%%%%% MAIN EQUATION %%%%%%%%%%%% 
@@ -187,21 +186,21 @@ hold on
 end 
 hold on;
 plot(x_axis_positive,positive_rates, 'b','LineWidth',2);
-xExactLegend_10 = [string([1:nsim]) + 'xExact' '12 Months Bot Yield 1980-2015'];
+xExactLegend_10 = [string([1:nsim]) + 'xExact' data_type];
 legend(xExactLegend_10);
 hold off; 
 xlabel('Year');ylabel('Interest Rates in Percentage');
 datetick('x','yyyy');
-title('12 Months Bot Yield and 10 simulated paths 1980-2015');
+title(join([data_type; "and 10 simulated paths"], ' '));
 
 %i compute the mean of the paths(10)
 figure();
 mean_exact_10=mean(xExact');
 plot(x_axis_positive,mean_exact_10,'k-',x_axis_positive,positive_rates);
 xlabel('Year');ylabel('Interest rates in Percentage');
-title('12 Months Bot Yield and mean of 10 simulated paths 1980-2015','fontsize',10);
+title(join([data_type; "and mean of 10 simulated paths"], ' '));
 datetick('x','yyyy');
-legend('Mean of 10 paths','12 Months Bot Yield');
+legend('Mean of 10 paths', data_type);
 
 %% 100 simulation paths
 nsim=100;
@@ -217,16 +216,16 @@ plot(x_axis_positive,positive_rates, 'b', 'LineWidth',2);
 hold off
 xlabel('Year');ylabel('Interest Rates in Percentage');
 datetick('x','yyyy');
-title('12 Months Bot Yield and 100 simulated paths 1980-2015');
+title(join([data_type; "and 100 simulated paths"], ' '));
 
 %i compute the mean of the paths(100)
 mean_exact_100=mean(xExact');
 figure();
 plot(x_axis_positive,mean_exact_100,'k-',x_axis_positive,positive_rates);
 xlabel('Year');ylabel('Interest rates in Percentage');
-title('12 Months Bot Yield and mean of 100 simulated paths 1980-2015','fontsize',10);
+title(join([data_type; "and mean of 100 simulated paths"], ' '));
 datetick('x','yyyy');
-legend('Mean of 100 paths','12 Months Bot Yield');
+legend('Mean of 100 paths', data_type);
 
 %% 1000 simulation paths
 nsim=1000;
@@ -240,13 +239,13 @@ end
 hold on
 plot(x_axis_positive,positive_rates,'b','LineWidth',2);
 datetick('x','yyyy');
-title('12 Months Bot Yield and 1000 simulated paths 1980-2015');
+title(join([data_type; "and 1000 simulated paths"], ' '));
 
 %i compute the mean of the paths(1000)
 mean_exact_1000=mean(xExact');
 figure();
 plot(x_axis_positive,mean_exact_1000,'k-',x_axis_positive,positive_rates);
 xlabel('Year');ylabel('Interest rates in Percentage');
-title('12 Months Bot Yield and mean of 1000 simulated paths 1980-2015','fontsize',10);
+title(join([data_type; "and mean of 1000 simulated paths"], ' '));
 datetick('x','yyyy');
-legend('Mean of 1000 paths','12 Months Bot Yield');
+legend('Mean of 1000 paths', data_type);

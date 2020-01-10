@@ -1,23 +1,23 @@
 %% DOC: https://it.mathworks.com/help/fininst/swaptionbyblk.html - https://it.mathworks.com/help/fininst/floorbyblk.html - 
-% https://it.mathworks.com/help/fininst/capbyblk.html
+%% https://it.mathworks.com/help/fininst/capbyblk.html
 % LIBOR + OIS: https://www.bankofengland.co.uk/statistics/yield-curves
 clc; clear all; clear; rng(1);
 %% 8 Jan 2020 YIELD CURVE
 format long;
 ValuationDate = datenum('08-Jan-2020');
 input_data_path = 'LIBOR_SPOT_08012020_DAILY_25ANNI.xlsx';
-Compounding = -1;
+Compounding = 2;
 Settle = datestr(addtodate(ValuationDate, 1, 'year'));
 DateCurveSamples = 0.5:0.5:25;
 %DateCurveSamples = [3/12 6/12 9/12 1:30];
 
 % CAP-FLOOR PARAMS
 Maturity = {datestr(addtodate(datenum(Settle), 1, 'year')), datestr(addtodate(datenum(Settle), 2, 'year'))};
-Strike = 0.12;
+Strike = [0.0085;0.0085];
 Volatility = 0.12; % From here: http://www.cboe.com/products/vix-index-volatility/volatility-on-interest-rates for LIBOR - VIX
 Shift = 0.7;
 Principal = 100000;
-Reset = 4;
+Reset = 1;
 
 % SWAPTION PARAMS
 ExerciseDate = datestr(addtodate(datenum(Settle), 2, 'year'));
@@ -44,7 +44,7 @@ title("Forward Rate Curve LIBOR")
 %%
 
 % Compounding set to -1 because it is continuos (stated in the ECB site)
-Curve = intenvset('Rates',SpotRates,'StartDate',ValuationDate,'EndDates',CurveDates,'Compounding',Compounding,'Basis',Basis, ...
+Curve = intenvset('Rates',ForwardRates,'StartDate',Settle,'EndDates',CurveDates,'Compounding',Compounding,'Basis',Basis, ...
     'ValuationDate',ValuationDate);
 % If there is at least one negative rate value, apply Shift Black Model
 if negative_rates
