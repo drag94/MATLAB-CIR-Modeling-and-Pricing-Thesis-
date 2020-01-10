@@ -1,6 +1,6 @@
 %% DOC: https://it.mathworks.com/help/fininst/swaptionbyblk.html - https://it.mathworks.com/help/fininst/floorbyblk.html - 
 %% https://it.mathworks.com/help/fininst/capbyblk.html
-% LIBOR + OIS: https://www.bankofengland.co.uk/statistics/yield-curves
+% LIBOR https://www.bankofengland.co.uk/statistics/yield-curves
 clc; clear all; clear; rng(1);
 %% 8 Jan 2020 YIELD CURVE
 format long;
