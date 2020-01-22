@@ -1,7 +1,7 @@
 % LIBOR https://www.bankofengland.co.uk/statistics/yield-curves
 clc; clear all; clear; rng(1);
 data_frequency = 2;
-data_type = 'Libor Spot';
+data_type = 'Libor Forward Curve 8 JAN 2020';
 format long;
 input_data_path = 'LIBOR_SPOT_08012020_DAILY_25ANNI.xlsx';
 ValuationDate = '08-Jan-2020';
@@ -16,14 +16,20 @@ negative_rates = ~isempty(find(SpotRates < 0, 1));
 SpotRates = SpotRates/100;
 figure();
 plot(DateCurveSamples,SpotRates)
-title("Spot Rate Curve LIBOR")
+curtick = get(gca, 'YTick');
+set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
+xlabel('Maturity'); ylabel('Interest rates in percentage')
+title("Spot Rate Curve LIBOR 8 JAN 2020")
 
 % Forward curve plotted
 [ForwardRates, CurveDates] = zero2fwd(SpotRates, CurveDates, ... 
 ValuationDate);
 figure();
 plot(DateCurveSamples,ForwardRates)
-title("Forward Rate Curve LIBOR")
+curtick = get(gca, 'YTick');
+set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
+xlabel('Maturity'); ylabel('Interest rates in percentage')
+title("Forward Rate Curve LIBOR 8 JAN 2020")
 
 %%
 positive_rates = ForwardRates;
@@ -88,12 +94,18 @@ for i=1:nsim
  disp(xExact(i));
  disp(cm(i,:));
 plot(x_axis_positive,xExact(:,i),'Color',cm(i,:));
+curtick = get(gca, 'YTick');
+set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
+xlabel('Maturity'); ylabel('Interest rates in percentage')
 hold on
 end 
 hold on;
 plot(x_axis_positive,positive_rates, 'b','LineWidth',2);
+curtick = get(gca, 'YTick');
+set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
 xExactLegend_1 = ["Simulated Forward Curve" data_type];
-legend(xExactLegend_1);
+leg = legend(xExactLegend_1);
+leg.Location = 'southeast';
 hold off; 
 xlabel('Year');ylabel('Interest Rates in Percentage');
 title(join([data_type; "and 1 simulated paths"], ' '));
@@ -105,10 +117,14 @@ figure();
 for i=1:nsim
     disp(xExact(i));
     plot(x_axis_positive, xExact(:,i));
+    curtick = get(gca, 'YTick');
+    set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
     hold on
 end
 hold on;
 plot(x_axis_positive,positive_rates, 'b', 'LineWidth',2);
+curtick = get(gca, 'YTick');
+set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
 hold off
 xlabel('Year');ylabel('Interest Rates in Percentage');
 title(join([data_type; "and 100 simulations"], ' '));
@@ -117,12 +133,16 @@ title(join([data_type; "and 100 simulations"], ' '));
 mean_exact_100=mean(xExact');
 figure();
 plot(x_axis_positive,mean_exact_100,'k-',x_axis_positive,positive_rates);
+curtick = get(gca, 'YTick');
+set(gca, 'YTickLabel', cellstr(num2str(curtick(:))));
 xlabel('Year');ylabel('Interest rates in Percentage');
 title(join([data_type; "and mean of 100 simulations"], ' '));
-legend('Mean of 100 paths', data_type);
+leg = legend('Mean of 100 paths', data_type);
+leg.Location = 'southeast';
 
 %% CAPBYCIR
-Strike = 0.0086;
+Strike_CAP = 0.0086;
+Strike_FLOOR = 0.008;
 Contract_steps = 10; % Since it is every 6 months = 2 every year, this means 10/2 = 5 years
 ValuationDateAsNum = datenum(ValuationDate);
 
@@ -144,8 +164,9 @@ CIRTimeSpec = cirtimespec(ValuationDate, Maturity, NumPeriods);
 CIRVolSpec = cirvolspec(sigma_optim, alpha_optim, mi_optim);
 CIRT = cirtree(CIRVolSpec, RateSpec, CIRTimeSpec);
 
-[Price,PriceTree] = capbycir(CIRT,Strike,Settle,Maturity, 'CapReset', CapReset, ...
+[PriceCAP,~] = capbycir(CIRT,Strike_CAP,Settle,Maturity, 'CapReset', CapReset, ...
     'Basis', Basis, 'Principal', Principal) 
 
-
+[PriceFLOOR,~] = floorbycir(CIRT,Strike_FLOOR,Settle,Maturity, 'FloorReset', CapReset, ...
+    'Basis', Basis, 'Principal', Principal) 
 %% SWAPTION PARAMS
