@@ -160,7 +160,8 @@ Maturity = '08-Jan-2025';
 CapReset = '2';
 Basis = 1;
 Principal = 100000;
-CIRTimeSpec = cirtimespec(ValuationDate, Maturity, NumPeriods);
+CIRTimeSpec = cirtimespec(ValuationDate, Maturity, NumPeriods, 'Basis', Basis,...
+    'Compounding', Compounding);
 CIRVolSpec = cirvolspec(sigma_optim, alpha_optim, mi_optim);
 CIRT = cirtree(CIRVolSpec, RateSpec, CIRTimeSpec);
 
@@ -170,3 +171,41 @@ CIRT = cirtree(CIRVolSpec, RateSpec, CIRTimeSpec);
 [PriceFLOOR,~] = floorbycir(CIRT,Strike_FLOOR,Settle,Maturity, 'FloorReset', CapReset, ...
     'Basis', Basis, 'Principal', Principal) 
 %% SWAPTION PARAMS
+
+ExerciseDatesEU = Dates(end-2);
+SwapSettlementEU = ExerciseDatesEU;
+SwapMaturityEU = Maturity;
+Spread = 0.11; % https://www.learningmarkets.com/understanding-the-libor-spread/
+SwapReset = 2;
+Strike = 0.007;
+
+%% EU
+OptionTypeEU = 0;
+%PUT
+OptSpec = 'put';  
+[PriceSwapEuPut,PriceTreeSwapEuPut] = swaptionbycir(CIRT,OptSpec,Strike,ExerciseDatesEU,Spread,SwapSettlementEU,SwapMaturityEU,'SwapReset',SwapReset, ...
+'Basis',Basis,'Principal',Principal, 'AmericanOpt', OptionTypeEU)
+
+%CALL
+OptSpec = 'call';  
+[PriceSwapEuCall,PriceTreeSwapEuCall] = swaptionbycir(CIRT,OptSpec,Strike,ExerciseDatesEU,Spread,SwapSettlementEU,SwapMaturityEU,'SwapReset',SwapReset, ...
+'Basis',Basis,'Principal',Principal, 'AmericanOpt', OptionTypeEU)
+
+
+%% USA
+ExerciseDatesUSA = [CIRT.dObs(end-5) CIRT.dObs(end-1)];
+SwapSettlementUSA = ExerciseDatesUSA(1);
+SwapMaturityUSA = Maturity;
+
+OptionTypeUSA = 1;
+%PUT
+OptSpec = 'put';  
+[PriceSwapUsaPut,PriceTreeSwapUsaPut] = swaptionbycir(CIRT,OptSpec,Strike,ExerciseDatesUSA,Spread,SwapSettlementUSA,...
+    SwapMaturityUSA,'SwapReset',SwapReset, ...
+'Basis',Basis,'Principal',Principal, 'AmericanOpt', OptionTypeUSA)
+
+%CALL
+OptSpec = 'call';  
+[PriceSwapUsaCall,PriceTreeSwapUsaCall] = swaptionbycir(CIRT,OptSpec,Strike,ExerciseDatesUSA,Spread,SwapSettlementUSA,...
+    SwapMaturityUSA,'SwapReset',SwapReset, ...
+'Basis',Basis,'Principal',Principal, 'AmericanOpt', OptionTypeUSA)
