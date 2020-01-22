@@ -11,4 +11,5 @@ CIREstimation('Pribor3mdaily.xlsx', frequency_daily, date_format_pribor, 'Pribor
 %%
 CIREstimation('Eur3Mmonthly.xlsx', frequency_monthly, date_format_euribor, 'Euribor 3M')
 
+%%
 

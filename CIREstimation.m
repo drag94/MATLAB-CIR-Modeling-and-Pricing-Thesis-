@@ -1,4 +1,4 @@
-function f = CIREstimation(input_data_path, data_frequency, date_format, data_type)
+function [alpha_optim, mi_optim, sigma_optim] = CIREstimation(input_data_path, data_frequency, date_format, data_type)
 
 %%%% I estimate the initial parameters
 %%% CIR Equation
