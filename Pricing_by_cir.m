@@ -150,7 +150,8 @@ Rates = mean_exact_100(1:Contract_steps)';
 Dates = cellstr(datestr([ValuationDateAsNum CurveDates(1:Contract_steps)']));
 EndDates = Dates(2:end)';
 Compounding = 1;
-RateSpec = intenvset('ValuationDate', ValuationDate, 'StartDates', ValuationDate, 'EndDates',EndDates,'Rates', Rates, 'Compounding', Compounding);
+RateSpec = intenvset('ValuationDate', ValuationDate, 'StartDates', ValuationDate, ...
+    'EndDates',EndDates,'Rates', Rates, 'Compounding', Compounding, 'Basis', Basis);
 
 %%
 NumPeriods = length(EndDates);
@@ -158,7 +159,6 @@ NumPeriods = length(EndDates);
 Settle = ValuationDate;
 Maturity = '08-Jan-2025'; 
 CapReset = '2';
-Basis = 1;
 Principal = 100000;
 CIRTimeSpec = cirtimespec(ValuationDate, Maturity, NumPeriods, 'Basis', Basis,...
     'Compounding', Compounding);
